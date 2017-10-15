@@ -4,7 +4,7 @@ import cv2
 import os
 import numpy.random as npr
 anno_file = "data/face/wider_face_train.txt"
-im_dir = "/disk1/chengw/DataSet/WIDER/WIDER_train/images"
+im_dir = "/home/huafei/DataSet/WIDER_FACE/WIDER_train/images"
 with open(anno_file, 'r') as f:
     annotations = f.readlines()
 num = len(annotations)
@@ -23,24 +23,18 @@ for annotation in annotations:
     save_img_roi_dir = img_roi_dir + str(num_label) + ".jpg"
     save_label_dir = label_dir + str(num_label) + ".txt"
 
-    img_shape = img.shape
+    max_wh = max(img.shape)
+    imgnew = np.zeros( (max_wh,max_wh,3), dtype=np.uint8 ) 
+    imgnew[0:img.shape[0],0:img.shape[1],:] = img.copy()
+    img_shape = imgnew.shape
     x_off = 0
     y_off = 0
-    min_wh = min(img_shape[0], img_shape[1])
-    if img_shape[0] > img_shape[1]:
-        y_off = int((img_shape[0]-img_shape[1])/2)
-    else:
-        x_off = int((img_shape[1]-img_shape[0])/2)
-    imgnew = img[y_off:y_off+min_wh-1, x_off:x_off+min_wh-1, :].copy()
+
     
     num_boxes1 = 0
     for box in boxes:
         # box (x_left, y_top, x_right, y_bottom)
         x1, y1, x2, y2 = box
-        x1 = max(int(x1) - x_off, 0)
-        x2 = min(int(x2) - x_off, imgnew.shape[1])
-        y1 = max(int(y1) - y_off, 0)
-        y2 = min(int(y2) - y_off, imgnew.shape[0])
         w = x2 - x1 + 1
         h = y2 - y1 + 1
         if x1 < 0 or y1 < 0 or x2 > imgnew.shape[1]-1 or y2 > imgnew.shape[0]-1 or w < 10 or h < 10:
@@ -55,10 +49,6 @@ for annotation in annotations:
     for box in boxes:
         # box (x_left, y_top, x_right, y_bottom)
         x1, y1, x2, y2 = box
-        x1 = max(int(x1) - x_off, 0)
-        x2 = min(int(x2) - x_off, imgnew.shape[1])
-        y1 = max(int(y1) - y_off, 0)
-        y2 = min(int(y2) - y_off, imgnew.shape[0])
         w = x2 - x1 + 1
         h = y2 - y1 + 1
         if x1 < 0 or y1 < 0 or x2 > imgnew.shape[1]-1 or y2 > imgnew.shape[0]-1 or w < 10 or h < 10:
